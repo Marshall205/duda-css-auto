@@ -9,34 +9,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: 18
 
-      - name: Install dependencies
+      - name: Install PostCSS + PurgeCSS
         run: |
           npm install postcss postcss-cli @fullhuman/postcss-purgecss
 
-      - name: Create postcss.config.js
+      - name: Create postcss.config.js with ESM syntax
         run: |
-          echo "module.exports = {
-            plugins: [
-              require('@fullhuman/postcss-purgecss')({
-                content: ['./index.html'],
-                defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || []
-              })
-            ]
-          };" > postcss.config.js
+          echo "import purgecss from '@fullhuman/postcss-purgecss';\n\nexport default {\n  plugins: [\n    purgecss({\n      content: ['./index.html'],\n      defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || []\n    })\n  ]\n};" > postcss.config.js
 
       - name: Run PurgeCSS
         run: |
           npx postcss input.css -o purged.css
 
-      - name: Deploy to gh-pages
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
