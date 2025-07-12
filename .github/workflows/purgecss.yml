@@ -21,18 +21,20 @@ jobs:
         run: |
           npm install postcss postcss-cli @fullhuman/postcss-purgecss
 
-      - name: Create postcss.config.js in CommonJS
+      - name: Create postcss.config.js (CommonJS format)
         run: |
-          echo "module.exports = {" > postcss.config.js
-          echo "  plugins: [" >> postcss.config.js
-          echo "    require('@fullhuman/postcss-purgecss')({" >> postcss.config.js
-          echo "      content: ['./index.html']," >> postcss.config.js
-          echo "      defaultExtractor: content => content.match(/[\\w-/:]+(?<!:)/g) || []" >> postcss.config.js
-          echo "    })" >> postcss.config.js
-          echo "  ]" >> postcss.config.js
-          echo "};" >> postcss.config.js
+          cat << 'EOF' > postcss.config.js
+          module.exports = {
+            plugins: [
+              require('@fullhuman/postcss-purgecss')({
+                content: ['./index.html'],
+                defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || [],
+              }),
+            ],
+          };
+          EOF
 
-      - name: Run PostCSS (PurgeCSS)
+      - name: Run PurgeCSS
         run: npx postcss input.css -o purged.css
 
       - name: Deploy to GitHub Pages
